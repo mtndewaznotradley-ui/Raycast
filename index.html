@@ -4,18 +4,20 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>MTNDEW Hub</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
 <style>
 :root{
-  --bg:#0b0d12;
   --panel:#121827;
   --panel2:#0f1422;
   --blue:#4ea1ff;
   --blue2:#2f7dff;
   --text:#eaf1ff;
-  --green:#21c46a;
 }
+
 *{box-sizing:border-box}
+
 body{
   margin:0;
   font-family:Inter,sans-serif;
@@ -23,6 +25,18 @@ body{
   color:var(--text);
   overflow:hidden;
 }
+
+canvas#waves,canvas#ripple{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  z-index:-2;
+}
+
+canvas#ripple{z-index:-1}
+
 .sidebar{
   position:fixed;
   width:250px;
@@ -30,11 +44,13 @@ body{
   padding:20px;
   background:linear-gradient(180deg,var(--panel),var(--panel2));
 }
+
 .logo{
   font-size:20px;
   font-weight:800;
   margin-bottom:25px;
 }
+
 .nav{
   width:100%;
   padding:12px;
@@ -44,44 +60,39 @@ body{
   background:rgba(18,24,39,0.6);
   color:var(--text);
   cursor:pointer;
-  transition:.25s;
 }
-.nav:hover{
-  transform:translateX(6px);
-  border-color:rgba(78,161,255,0.6);
-  box-shadow:0 0 18px rgba(78,161,255,0.2);
-}
+
+.nav:hover{transform:translateX(6px)}
+
 .active{
   background:linear-gradient(90deg,var(--blue),var(--blue2));
-  box-shadow:0 0 25px rgba(78,161,255,0.35);
 }
+
 .main{
   margin-left:270px;
   padding:25px;
   height:100vh;
 }
+
 .title{
   font-size:26px;
   font-weight:800;
   margin-bottom:20px;
 }
+
 .grid{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
   gap:18px;
 }
+
 .card{
   background:rgba(18,24,39,0.75);
   border:1px solid rgba(78,161,255,0.18);
   border-radius:22px;
   padding:16px;
-  backdrop-filter:blur(10px);
-  box-shadow:0 10px 30px rgba(0,0,0,0.35);
 }
-.card:hover{
-  transform:translateY(-6px);
-  box-shadow:0 0 30px rgba(78,161,255,0.25);
-}
+
 .btn{
   width:100%;
   padding:11px;
@@ -91,10 +102,9 @@ body{
   color:white;
   cursor:pointer;
   font-weight:600;
+  margin-top:10px;
 }
-.btn:hover{
-  filter:brightness(1.1);
-}
+
 .box{
   width:100%;
   height:120px;
@@ -106,79 +116,89 @@ body{
   padding:10px;
   font-family:monospace;
 }
-.link{
-  display:inline-block;
-  margin-top:10px;
-  padding:10px 14px;
+
+.tab{display:none}
+.activeTab{display:block}
+
+.keyBox{
+  padding:14px;
   border-radius:16px;
-  background:var(--green);
-  color:white;
-  text-decoration:none;
-}
-.tab{
-  display:none;
-  animation:fade .35s ease;
-}
-.activeTab{
-  display:block;
-}
-@keyframes fade{
-  from{opacity:0;transform:translateY(10px)}
-  to{opacity:1;transform:translateY(0)}
-}
-canvas{
-  position:fixed;
-  top:0;
-  left:0;
-  z-index:-1;
+  background:#0b0f1a;
+  border:1px solid rgba(78,161,255,0.2);
+  margin-top:10px;
+  font-family:monospace;
+  color:#7dffb2;
 }
 </style>
 </head>
+
 <body>
-<canvas id="c"></canvas>
+
+<canvas id="waves"></canvas>
+<canvas id="ripple"></canvas>
+
 <div class="sidebar">
-<div class="logo">MTNDEW HUB</div>
-<button class="nav active" onclick="openTab('dash',this)">Dashboard</button>
-<button class="nav" onclick="openTab('rbx',this)">Roblox</button>
-<button class="nav" onclick="openTab('mc',this)">Minecraft</button>
+  <div class="logo">MTNDEW HUB</div>
+  <button class="nav active" onclick="openTab('dash',this)">Dashboard</button>
+  <button class="nav" onclick="openTab('rbx',this)">Roblox</button>
+  <button class="nav" onclick="openTab('key',this)">Roblox Key System</button>
+  <button class="nav" onclick="openTab('mc',this)">Minecraft</button>
 </div>
+
 <div class="main">
+
 <div id="dash" class="tab activeTab">
-<div class="title">Dashboard</div>
-<div class="grid">
-<div class="card">Announcement<br>Website Made</div>
-<div class="card">Updates<br>- UI upgraded<br>- Better effects<br>- Smooth waves</div>
+  <div class="title">Dashboard</div>
+  <div class="card">System Online ⚡</div>
 </div>
-</div>
+
 <div id="rbx" class="tab">
-<div class="title">Roblox Scripts</div>
-<div class="grid">
-<div class="card">
-Be a Lucky Block
-<button class="btn" onclick="setScript(1)">Load</button>
+  <div class="title">Roblox Scripts</div>
+
+  <div class="grid">
+
+    <div class="card">
+      MTNDEW Hitbox Size
+      <button class="btn" onclick="setScript(1)">Load</button>
+    </div>
+
+    <div class="card">
+      Be a Lucky Block
+      <button class="btn" onclick="setScript(2)">Load</button>
+    </div>
+
+    <div class="card">
+      Draw & Slide
+      <button class="btn" onclick="setScript(3)">Load</button>
+    </div>
+
+  </div>
+
+  <textarea id="out" class="box" readonly></textarea>
 </div>
-<div class="card">
-Draw & Slide
-<button class="btn" onclick="setScript(2)">Load</button>
+
+<div id="key" class="tab">
+  <div class="title">Roblox Key System</div>
+
+  <div class="card">
+    Hitbox Size Key
+    <div class="keyBox" id="status">Wait 5 seconds...</div>
+    <button class="btn" onclick="startKey()">Generate Key</button>
+    <div class="keyBox" id="keyOut" style="display:none;"></div>
+  </div>
 </div>
-<div class="card">
-Discord
-<a class="link" href="https://discord.gg/Gx3UPpzq3M">Join</a>
-</div>
-</div>
-<div class="card">
-Script
-<textarea id="out" class="box" readonly></textarea>
-</div>
-</div>
+
 <div id="mc" class="tab">
-<div class="title">Minecraft Server</div>
-<div class="card">
-hilltopsmp.minekeep.gg
-<button class="btn" onclick="copy()">Click to Copy</button>
+  <div class="title">Minecraft Server</div>
+
+  <div class="card">
+    hilltopsmp.minekeep.gg
+    <button class="btn" onclick="copy()">Copy</button>
+  </div>
 </div>
+
 </div>
-</div>
+
 <script>
 function openTab(id,el){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('activeTab'));
@@ -186,36 +206,74 @@ function openTab(id,el){
   document.querySelectorAll('.nav').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
 }
+
 function setScript(i){
   const o=document.getElementById('out');
-  o.value=i===1?'loadstring(game:HttpGet("https://pastefy.app/6uORVYTL/raw"))()':'loadstring(game:HttpGet("https://pastefy.app/MH87a5xd/raw"))()';
+  if(i===1)o.value='loadstring(game:HttpGet("https://pastefy.app/Q1SA1a72/raw"))()';
+  if(i===2)o.value='loadstring(game:HttpGet("https://pastefy.app/6uORVYTL/raw"))()';
+  if(i===3)o.value='loadstring(game:HttpGet("https://pastefy.app/MH87a5xd/raw"))()';
 }
+
+function startKey(){
+  const s=document.getElementById("status");
+  const k=document.getElementById("keyOut");
+  s.innerText="Generating key...";
+  setTimeout(()=>{
+    s.innerText="Key Ready:";
+    k.style.display="block";
+    k.innerText="KEY_L3QFVPSDJ0JJ4IRBSK5YD";
+  },5000);
+}
+
 function copy(){
-  navigator.clipboard.writeText('hilltopsmp.minekeep.gg');
+  navigator.clipboard.writeText("hilltopsmp.minekeep.gg");
 }
-const canvas=document.getElementById('c');
-const ctx=canvas.getContext('2d');
-canvas.width=innerWidth;
-canvas.height=innerHeight;
+
+const w=document.getElementById("waves");
+const x=w.getContext("2d");
+w.width=innerWidth;
+w.height=innerHeight;
+let t=0;
+
+function wave(){
+  x.clearRect(0,0,w.width,w.height);
+  x.beginPath();
+  for(let i=0;i<w.width;i++){
+    let y=Math.sin(i*0.01+t)*20+w.height/2;
+    x.lineTo(i,y);
+  }
+  x.strokeStyle="rgba(78,161,255,0.15)";
+  x.stroke();
+  t+=0.03;
+  requestAnimationFrame(wave);
+}
+wave();
+
+const c=document.getElementById('ripple');
+const r=c.getContext('2d');
+c.width=innerWidth;
+c.height=innerHeight;
 let rip=[];
+
 document.addEventListener('mousemove',e=>{
   rip.push({x:e.clientX,y:e.clientY,r:0,a:1});
 });
+
 function draw(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+  r.clearRect(0,0,c.width,c.height);
   rip.forEach((p,i)=>{
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-    ctx.strokeStyle='rgba(78,161,255,'+p.a+')';
-    ctx.lineWidth=2;
-    ctx.stroke();
-    p.r+=1.8;
-    p.a-=0.015;
+    r.beginPath();
+    r.arc(p.x,p.y,p.r,0,Math.PI*2);
+    r.strokeStyle=`rgba(78,161,255,${p.a})`;
+    r.stroke();
+    p.r+=1.5;
+    p.a-=0.02;
     if(p.a<=0)rip.splice(i,1);
   });
   requestAnimationFrame(draw);
 }
 draw();
 </script>
+
 </body>
 </html>
