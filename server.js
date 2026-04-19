@@ -5,10 +5,10 @@ app.use(express.json());
 app.use(express.static("public"));
 
 app.post("/api/order", async (req, res) => {
-    const { email } = req.body;
+    const { email, item } = req.body;
 
-    if (!email) {
-        return res.status(400).send("Missing email");
+    if (!email || !item) {
+        return res.status(400).send("Missing data");
     }
 
     try {
@@ -16,14 +16,14 @@ app.post("/api/order", async (req, res) => {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                content: `🚀 New Order\nEmail: ${email}`
+                content: `🚀 **New Order**\n🛒 Item: ${item}\n📧 Email: ${email}`
             })
         });
 
-        res.status(200).send("OK");
+        res.sendStatus(200);
     } catch (err) {
         console.error(err);
-        res.status(500).send("Error");
+        res.sendStatus(500);
     }
 });
 
