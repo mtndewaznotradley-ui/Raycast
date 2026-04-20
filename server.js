@@ -1,16 +1,20 @@
 const express = require("express");
+const cors = require("cors");
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
+
+app.get("/", (req, res) => {
+    res.send("Server is online and running!");
+});
 
 app.post("/api/order", async (req, res) => {
     const { email, item } = req.body;
 
-    console.log("ORDER:", req.body);
-
     if (!email || !item) {
-        return res.status(400).send("Missing data");
+        return res.status(400).send("Missing email or item data");
     }
 
     try {
@@ -18,20 +22,22 @@ app.post("/api/order", async (req, res) => {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                content: `🚀 **New Order**\n🛒 Item: ${item}\n📧 Email: ${email}`
+                content: `🚀 **New Order Received**\n━━━━━━━━━━━━━━━━━━━━\n🛒 **Item:** ${item}\n📧 **Email:** ${email}\n⏰ **Date:** ${new Date().toLocaleString()}\n━━━━━━━━━━━━━━━━━━━━`
             })
         });
 
-        console.log("Discord status:", response.status);
+        if (response.ok) {
+            res.sendStatus(200);
+        } else {
+            res.sendStatus(500);
+        }
 
-        res.sendStatus(200);
     } catch (err) {
-        console.error("Webhook error:", err);
         res.sendStatus(500);
     }
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });
