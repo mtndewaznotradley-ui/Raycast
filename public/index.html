@@ -50,25 +50,13 @@
         }
 
         @keyframes wave {
-            0% {
-                margin-left: 0;
-            }
-
-            100% {
-                margin-left: -1600px;
-            }
+            0% { margin-left: 0; }
+            100% { margin-left: -1600px; }
         }
 
         @keyframes swell {
-
-            0%,
-            100% {
-                transform: translate3d(0, -25px, 0);
-            }
-
-            50% {
-                transform: translate3d(0, 5px, 0);
-            }
+            0%, 100% { transform: translate3d(0, -25px, 0); }
+            50% { transform: translate3d(0, 5px, 0); }
         }
 
         nav {
@@ -115,15 +103,8 @@
         }
 
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .shop-item {
@@ -164,6 +145,7 @@
             display: inline-block;
             margin-top: 10px;
             transition: transform 0.2s;
+            cursor: pointer;
         }
 
         .venmo-btn:hover {
@@ -218,7 +200,7 @@
             <br>
 
             <a href="https://venmo.com/code?user_id=4578443039605974659" target="_blank" class="venmo-btn"
-                onclick="handlePurchase()">
+                onclick="handlePurchase(event, 'Roblox Account: Stealabrainrot637420')">
                 <img src="https://github.com/mtndewaznotradley-ui/Mtndew/raw/main/Venmo_Logo.jpg">
             </a>
 
@@ -245,29 +227,27 @@
             evt.currentTarget.classList.add("active");
         }
 
-        function handlePurchase() {
+        async function handlePurchase(event, itemName) {
             const email = document.getElementById('userEmail').value;
 
             if (!email) {
+                event.preventDefault();
                 alert("Please enter your email so I know where to send the account info!");
                 return;
             }
 
-            const backendURL = "https://mtndew.onrender.com/api/order";
+            const backendURL = "/api/order";
 
-            fetch(backendURL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
-            }).then(() => {
-                console.log("Server notified!");
-            }).catch(err => {
-                console.error("Error notifying server", err);
-            });
-
-            const subject = encodeURIComponent("Order: Stealabrainrot637420");
-            const body = encodeURIComponent("I am currently processing your order.\n\nDetails will follow after verification.");
-            window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+            try {
+                await fetch(backendURL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, item: itemName })
+                });
+                console.log("Order logged.");
+            } catch (err) {
+                console.error("Order log failed.", err);
+            }
         }
     </script>
 </body>
