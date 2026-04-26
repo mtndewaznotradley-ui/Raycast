@@ -228,7 +228,7 @@
     </div>
 
     <script>
-        function showTab(evt, tabId, isInitial = false) {
+        function showTab(evt, tabId) {
             const contents = document.getElementsByClassName("tab-content");
             for (let i = 0; i < contents.length; i++) contents[i].classList.remove("active");
             
@@ -242,30 +242,8 @@
 
             if (evt) {
                 evt.currentTarget.classList.add("active");
-            } else {
-                Array.from(links).forEach(btn => {
-                    if (btn.innerText.includes(tabId)) btn.classList.add("active");
-                });
-            }
-
-            if (!isInitial) {
-                const newUrl = window.location.origin + '/' + tabId;
-                window.history.pushState({ path: newUrl }, '', newUrl);
             }
         }
-
-        window.onload = () => {
-            const path = window.location.pathname.replace('/', '');
-            const validTabs = ['Dashboard', 'Minecraft', 'Apps'];
-            if (validTabs.includes(path)) {
-                showTab(null, path, true);
-            }
-        };
-
-        window.onpopstate = () => {
-            const path = window.location.pathname.replace('/', '');
-            showTab(null, path || 'Dashboard', true);
-        };
 
         function startDownload() {
             const btn = document.getElementById('downloadBtn');
