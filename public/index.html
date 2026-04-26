@@ -113,7 +113,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .shop-item, .app-card {
+        .app-card {
             background: var(--card-bg);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 20px;
@@ -124,7 +124,7 @@
             transition: 0.3s;
         }
 
-        .shop-item:hover, .app-card:hover {
+        .app-card:hover {
             border-color: var(--primary);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
@@ -177,36 +177,6 @@
             color: var(--primary);
         }
 
-        .email-input {
-            width: 100%;
-            max-width: 300px;
-            padding: 12px;
-            margin: 15px auto;
-            display: block;
-            border-radius: 10px;
-            border: 1px solid #333;
-            background: #000;
-            color: white;
-            text-align: center;
-        }
-
-        .venmo-btn {
-            display: inline-block;
-            margin-top: 10px;
-            transition: transform 0.2s;
-            cursor: pointer;
-        }
-
-        .venmo-btn:hover {
-            transform: scale(1.1);
-        }
-
-        .venmo-btn img {
-            width: 200px;
-            max-width: 100%;
-            border-radius: 12px;
-        }
-
         h2 {
             color: var(--primary);
             margin-bottom: 5px;
@@ -229,7 +199,6 @@
     <nav>
         <button class="tab-link active" onclick="showTab(event, 'Dashboard')">Dashboard</button>
         <button class="tab-link" onclick="showTab(event, 'Minecraft')">Minecraft Server</button>
-        <button class="tab-link" onclick="showTab(event, 'Shop')">Shop</button>
         <button class="tab-link" onclick="showTab(event, 'Apps')">Apps</button>
     </nav>
 
@@ -244,28 +213,13 @@
         <p>Status: <span style="color: #4cd137;">Online</span></p>
     </div>
 
-    <div id="Shop" class="tab-content">
-        <h1>Official Shop</h1>
-        <div class="shop-item">
-            <img src="https://github.com/mtndewaznotradley-ui/Raycast/raw/main/images/noFilter.png" class="avatar-img">
-            <h2>Roblox Account 13-15 Aged Verified 20$</h2>
-            <p>Name: <b>Stealabrainrot637420</b></p>
-            <input type="email" id="userEmail" class="email-input" placeholder="Enter your email for delivery">
-            <a href="https://venmo.com/code?user_id=4578443039605974659" target="_blank" class="venmo-btn" onclick="handlePurchase(event, 'Roblox Account: Stealabrainrot637420')">
-                <img src="https://github.com/mtndewaznotradley-ui/Raycast/raw/main/images/Venmo_Logo.jpg" alt="Venmo">
-            </a>
-        </div>
-    </div>
-
     <div id="Apps" class="tab-content">
         <h1>Apps</h1>
         <div class="app-card">
             <img src="https://github.com/mtndewaznotradley-ui/Raycast/raw/main/images/Discord%20bot.png" alt="Discord Bot Icon" class="avatar-img">
             <h2>Discord Bot</h2>
             <p>Raid a Server!</p>
-            
             <button id="downloadBtn" class="download-btn" onclick="startDownload()">Download</button>
-
             <div id="progressContainer" class="progress-container">
                 <div id="progressBar" class="progress-bar"></div>
             </div>
@@ -274,14 +228,44 @@
     </div>
 
     <script>
-        function showTab(evt, tabId) {
+        function showTab(evt, tabId, isInitial = false) {
             const contents = document.getElementsByClassName("tab-content");
             for (let i = 0; i < contents.length; i++) contents[i].classList.remove("active");
+            
             const links = document.getElementsByClassName("tab-link");
             for (let i = 0; i < links.length; i++) links[i].classList.remove("active");
-            document.getElementById(tabId).classList.add("active");
-            evt.currentTarget.classList.add("active");
+
+            const activeTab = document.getElementById(tabId);
+            if (activeTab) {
+                activeTab.classList.add("active");
+            }
+
+            if (evt) {
+                evt.currentTarget.classList.add("active");
+            } else {
+                Array.from(links).forEach(btn => {
+                    if (btn.innerText.includes(tabId)) btn.classList.add("active");
+                });
+            }
+
+            if (!isInitial) {
+                const newUrl = window.location.origin + '/' + tabId;
+                window.history.pushState({ path: newUrl }, '', newUrl);
+            }
         }
+
+        window.onload = () => {
+            const path = window.location.pathname.replace('/', '');
+            const validTabs = ['Dashboard', 'Minecraft', 'Apps'];
+            if (validTabs.includes(path)) {
+                showTab(null, path, true);
+            }
+        };
+
+        window.onpopstate = () => {
+            const path = window.location.pathname.replace('/', '');
+            showTab(null, path || 'Dashboard', true);
+        };
 
         function startDownload() {
             const btn = document.getElementById('downloadBtn');
@@ -307,29 +291,6 @@
                     status.innerText = "Downloading: " + width + "%";
                 }
             }, 200);
-        }
-
-        async function handlePurchase(event, itemName) {
-            const email = document.getElementById('userEmail').value;
-            if (!email) {
-                event.preventDefault();
-                alert("Please enter your email!");
-                return;
-            }
-
-            event.preventDefault();
-            const venmoUrl = event.currentTarget.href;
-
-            try {
-                await fetch('https://srv-d7ilth9kh4rs73b36sf0.onrender.com/purchase', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: email, item: itemName })
-                });
-                window.location.href = venmoUrl;
-            } catch (error) {
-                window.location.href = venmoUrl;
-            }
         }
     </script>
 </body>
