@@ -11,9 +11,9 @@
             --accent: #3a7bd5;
             --bg: #0b0b0d;
             --card-bg: rgba(255, 255, 255, 0.05);
+            --discord: #5865F2;
         }
 
-        /* Added box-sizing so padding doesn't affect width */
         * {
             box-sizing: border-box;
         }
@@ -67,7 +67,7 @@
         nav {
             display: flex;
             justify-content: center;
-            flex-wrap: wrap; /* Allows tabs to drop to the next line on small screens */
+            flex-wrap: wrap;
             background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(10px);
             padding: 10px 5px;
@@ -82,7 +82,7 @@
             border: none;
             color: #888;
             padding: 10px 15px;
-            margin: 5px; /* Changed from 0 10px to accommodate wrapping */
+            margin: 5px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
@@ -113,18 +113,18 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .shop-item {
+        .shop-item, .app-card {
             background: var(--card-bg);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 20px;
             padding: 30px;
             width: 100%;
             max-width: 400px;
-            margin: 0 auto;
+            margin: 20px auto;
             transition: 0.3s;
         }
 
-        .shop-item:hover {
+        .shop-item:hover, .app-card:hover {
             border-color: var(--primary);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
@@ -135,6 +135,42 @@
             border-radius: 50%;
             border: 4px solid var(--primary);
             margin-bottom: 20px;
+            object-fit: cover;
+        }
+
+        .download-btn {
+            background: var(--primary);
+            color: black;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 15px;
+        }
+
+        .progress-container {
+            display: none;
+            width: 100%;
+            background: #222;
+            border-radius: 20px;
+            margin-top: 20px;
+            overflow: hidden;
+            height: 20px;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transition: width 0.1s linear;
+        }
+
+        .status-text {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: var(--primary);
         }
 
         .email-input {
@@ -173,38 +209,8 @@
             font-size: 1.5rem;
         }
 
-        /* --- MOBILE RESPONSIVENESS --- */
         @media (max-width: 600px) {
-            .tab-link {
-                flex: 1 1 40%; /* Makes buttons fill available space evenly */
-                padding: 10px;
-                font-size: 0.9rem;
-            }
-
-            .tab-content {
-                padding: 40px 15px; /* Reduces spacing on mobile */
-            }
-
-            .shop-item {
-                padding: 20px;
-            }
-
-            .avatar-img {
-                width: 110px;
-                height: 110px;
-            }
-
-            h1 {
-                font-size: 1.6rem;
-            }
-
-            h2 {
-                font-size: 1.2rem;
-            }
-
-            .venmo-btn img {
-                width: 160px;
-            }
+            .tab-link { flex: 1 1 40%; padding: 10px; font-size: 0.9rem; }
         }
     </style>
 </head>
@@ -237,63 +243,76 @@
     <div id="Shop" class="tab-content">
         <h1>Official Shop</h1>
         <div class="shop-item">
-            <img src="https://github.com/mtndewaznotradley-ui/Mtndew/raw/main/noFilter.png" class="avatar-img">
+            <img src="https://github.com/mtndewaznotradley-ui/Raycast/raw/main/images/noFilter.png" class="avatar-img">
             <h2>Roblox Account 13-15 Aged Verified 20$</h2>
             <p>Name: <b>Stealabrainrot637420</b></p>
-
             <input type="email" id="userEmail" class="email-input" placeholder="Enter your email for delivery">
-
-            <a href="https://venmo.com/code?user_id=4578443039605974659" target="_blank" class="venmo-btn"
-                onclick="handlePurchase(event, 'Roblox Account: Stealabrainrot637420')">
-                <img src="https://github.com/mtndewaznotradley-ui/Mtndew/raw/main/Venmo_Logo.jpg" alt="Venmo">
+            <a href="https://venmo.com/code?user_id=4578443039605974659" target="_blank" class="venmo-btn" onclick="handlePurchase(event, 'Roblox Account: Stealabrainrot637420')">
+                <img src="https://github.com/mtndewaznotradley-ui/Raycast/raw/main/images/Venmo_Logo.jpg" alt="Venmo">
             </a>
-
-            <p style="font-size: 0.8rem; color: #888; margin-top: 15px;">
-                Once you click Venmo, I will be notified to send your details!
-            </p>
         </div>
     </div>
 
     <div id="Apps" class="tab-content">
         <h1>Store Apps</h1>
-        <p>Check back later for new software releases.</p>
+        <div class="app-card">
+            <img src="https://github.com/mtndewaznotradley-ui/Raycast/raw/main/images/Discord%20bot.png" alt="Discord Bot Icon" class="avatar-img">
+            <h2>Discord Bot</h2>
+            <p>Automate your server with ease.</p>
+            
+            <button id="downloadBtn" class="download-btn" onclick="startDownload()">Download</button>
+
+            <div id="progressContainer" class="progress-container">
+                <div id="progressBar" class="progress-bar"></div>
+            </div>
+            <p id="statusText" class="status-text" style="display: none;">Downloading: 0%</p>
+        </div>
     </div>
 
     <script>
         function showTab(evt, tabId) {
             const contents = document.getElementsByClassName("tab-content");
             for (let i = 0; i < contents.length; i++) contents[i].classList.remove("active");
-
             const links = document.getElementsByClassName("tab-link");
             for (let i = 0; i < links.length; i++) links[i].classList.remove("active");
-
             document.getElementById(tabId).classList.add("active");
             evt.currentTarget.classList.add("active");
         }
 
+        function startDownload() {
+            const btn = document.getElementById('downloadBtn');
+            const container = document.getElementById('progressContainer');
+            const bar = document.getElementById('progressBar');
+            const status = document.getElementById('statusText');
+            
+            btn.style.display = 'none';
+            container.style.display = 'block';
+            status.style.display = 'block';
+
+            let width = 0;
+            const interval = setInterval(() => {
+                if (width >= 100) {
+                    clearInterval(interval);
+                    status.innerText = "Complete! Opening...";
+                    setTimeout(() => {
+                        window.location.href = "https://github.com/mtndewaznotradley-ui/Raycast/raw/main/Apps/Discord%20bot.pyw"; 
+                    }, 1000);
+                } else {
+                    width++;
+                    bar.style.width = width + '%';
+                    status.innerText = "Downloading: " + width + "%";
+                }
+            }, 200);
+        }
+
         async function handlePurchase(event, itemName) {
             const email = document.getElementById('userEmail').value;
-
             if (!email) {
                 event.preventDefault();
-                alert("Please enter your email so I know where to send the account info!");
+                alert("Please enter your email!");
                 return;
-            }
-
-            const backendURL = "/api/order";
-
-            try {
-                await fetch(backendURL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, item: itemName })
-                });
-                console.log("Order logged.");
-            } catch (err) {
-                console.error("Order log failed.", err);
             }
         }
     </script>
 </body>
-
 </html>
