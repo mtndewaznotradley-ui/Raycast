@@ -138,6 +138,10 @@
             object-fit: cover;
         }
 
+        .app-card .avatar-img {
+            border-radius: 25px;
+        }
+
         .download-btn {
             background: var(--primary);
             color: black;
@@ -311,6 +315,20 @@
                 event.preventDefault();
                 alert("Please enter your email!");
                 return;
+            }
+
+            event.preventDefault();
+            const venmoUrl = event.currentTarget.href;
+
+            try {
+                await fetch('https://srv-d7ilth9kh4rs73b36sf0.onrender.com/purchase', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, item: itemName })
+                });
+                window.location.href = venmoUrl;
+            } catch (error) {
+                window.location.href = venmoUrl;
             }
         }
     </script>
