@@ -4,226 +4,224 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Service Dashboard</title>
+    <title>TERMINAL // Service Dashboard</title>
     <style>
         :root {
-            --primary: #00d2ff;
-            --accent: #3a7bd5;
-            --bg: #0b0b0d;
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --discord: #5865F2;
+            --primary: #00ff41;
+            --accent: #003b00;
+            --bg: #050505;
+            --card-bg: rgba(0, 255, 65, 0.05);
+            --text-glow: 0 0 8px rgba(0, 255, 65, 0.8);
         }
 
         * {
             box-sizing: border-box;
+            font-family: 'Courier New', Courier, monospace;
         }
 
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg);
-            color: white;
+            color: var(--primary);
             overflow-x: hidden;
+            text-shadow: var(--text-glow);
         }
 
-        .ocean {
-            height: 5%;
-            width: 100%;
+        body::before {
+            content: " ";
+            display: block;
             position: fixed;
-            bottom: 0;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 200;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
             left: 0;
-            background: transparent;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(0, 255, 65, 0.1) 0%, transparent 100%);
             z-index: -1;
+            opacity: 0.15;
+            animation: pulse 4s infinite;
         }
 
-        .wave {
-            background: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/85486/wave.svg) repeat-x;
-            position: absolute;
-            top: -198px;
-            width: 6400px;
-            height: 198px;
-            animation: wave 7s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
-            transform: translate3d(0, 0, 0);
-            opacity: 0.3;
-        }
-
-        .wave:nth-of-type(2) {
-            top: -175px;
-            animation: wave 7s cubic-bezier(0.36, 0.45, 0.63, 0.53) -0.125s infinite, swell 7s ease -0.125s infinite;
-            opacity: 0.1;
-        }
-
-        @keyframes wave {
-            0% { margin-left: 0; }
-            100% { margin-left: -1600px; }
-        }
-
-        @keyframes swell {
-            0%, 100% { transform: translate3d(0, -25px, 0); }
-            50% { transform: translate3d(0, 5px, 0); }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.1; }
+            50% { opacity: 0.2; }
         }
 
         nav {
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
+            background: rgba(0, 20, 0, 0.9);
             padding: 10px 5px;
             position: sticky;
             top: 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 2px solid var(--primary);
             z-index: 100;
         }
 
         .tab-link {
             background: none;
-            border: none;
-            color: #888;
-            padding: 10px 15px;
+            border: 1px solid transparent;
+            color: var(--primary);
+            padding: 10px 20px;
             margin: 5px;
             font-size: 1rem;
-            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
             cursor: pointer;
-            transition: 0.3s;
-            border-radius: 8px;
+            transition: 0.2s;
         }
 
         .tab-link:hover,
         .tab-link.active {
-            color: var(--primary);
-            background: rgba(0, 210, 255, 0.1);
+            background: var(--primary);
+            color: black;
+            box-shadow: 0 0 15px var(--primary);
         }
 
         .tab-content {
             display: none;
             padding: 60px 20px;
-            text-align: center;
+            text-align: left;
+            max-width: 800px;
+            margin: 0 auto;
             min-height: 80vh;
         }
 
         .tab-content.active {
             display: block;
-            animation: fadeInUp 0.4s ease forwards;
+            animation: glitch 0.3s ease;
         }
 
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes glitch {
+            0% { transform: skew(5deg); opacity: 0; }
+            50% { transform: skew(-5deg); opacity: 1; }
+            100% { transform: skew(0); }
         }
 
         .app-card {
-            background: var(--card-bg);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
+            background: var(--bg);
+            border: 1px solid var(--primary);
             padding: 30px;
             width: 100%;
-            max-width: 400px;
-            margin: 20px auto;
-            transition: 0.3s;
+            max-width: 450px;
+            margin: 20px 0;
+            position: relative;
         }
 
-        .app-card:hover {
-            border-color: var(--primary);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        .app-card::after {
+            content: "SECURED_ENV";
+            position: absolute;
+            top: -10px; right: 10px;
+            background: var(--bg);
+            font-size: 0.7rem;
+            padding: 0 5px;
         }
 
         .avatar-img {
-            width: 140px;
-            height: 140px;
-            border-radius: 50%;
-            border: 4px solid var(--primary);
+            width: 120px;
+            filter: grayscale(1) sepia(1) hue-rotate(60deg) saturate(5);
+            border: 1px solid var(--primary);
             margin-bottom: 20px;
-            object-fit: cover;
-        }
-
-        .app-card .avatar-img {
-            border-radius: 25px;
         }
 
         .download-btn {
-            background: var(--primary);
-            color: black;
-            border: none;
+            background: none;
+            color: var(--primary);
+            border: 1px solid var(--primary);
             padding: 12px 30px;
-            border-radius: 10px;
             font-weight: bold;
             cursor: pointer;
-            font-size: 1rem;
-            margin-top: 15px;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+
+        .download-btn:hover {
+            background: var(--primary);
+            color: black;
         }
 
         .progress-container {
             display: none;
             width: 100%;
-            background: #222;
-            border-radius: 20px;
+            border: 1px solid var(--primary);
             margin-top: 20px;
-            overflow: hidden;
-            height: 20px;
+            height: 25px;
+            background: #000;
         }
 
         .progress-bar {
             width: 0%;
             height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-            transition: width 0.1s linear;
+            background: var(--primary);
         }
 
-        .status-text {
-            margin-top: 10px;
-            font-size: 0.9rem;
-            color: var(--primary);
+        h1, h2 {
+            text-transform: uppercase;
+            letter-spacing: 3px;
         }
 
-        h2 {
-            color: var(--primary);
-            margin-bottom: 5px;
-            font-size: 1.5rem;
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.2rem;
+            background: var(--primary);
+            animation: blink 0.8s infinite;
+            vertical-align: middle;
         }
 
-        @media (max-width: 600px) {
-            .tab-link { flex: 1 1 40%; padding: 10px; font-size: 0.9rem; }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
         }
     </style>
 </head>
 
 <body>
 
-    <div class="ocean">
-        <div class="wave"></div>
-        <div class="wave"></div>
-    </div>
+    <div class="matrix-bg"></div>
 
     <nav>
-        <button class="tab-link active" onclick="showTab(event, 'Dashboard')">Dashboard</button>
-        <button class="tab-link" onclick="showTab(event, 'Minecraft')">Minecraft Server</button>
-        <button class="tab-link" onclick="showTab(event, 'Apps')">Apps</button>
+        <button class="tab-link active" onclick="showTab(event, 'Dashboard')">[ DASHBOARD ]</button>
+        <button class="tab-link" onclick="showTab(event, 'Minecraft')">[ SERVER_LOGS ]</button>
+        <button class="tab-link" onclick="showTab(event, 'Apps')">[ EXPLOITS ]</button>
     </nav>
 
     <div id="Dashboard" class="tab-content active">
-        <h1>Welcome, user</h1>
-        <p>Your systems are running at 100% efficiency.</p>
+        <h1>ACCESS GRANTED: User_01 <span class="cursor"></span></h1>
+        <p>> SYST_STATUS: STABLE</p>
+        <p>> ENCRYPTION: ACTIVE</p>
+        <p>> SYSTEM LOAD: 1.02%</p>
     </div>
 
     <div id="Minecraft" class="tab-content">
-        <h1>Minecraft Server</h1>
-        <p>Server IP: <b>hilltopsmp.minekeep.gg</b></p>
-        <p>Status: <span style="color: #4cd137;">Online</span></p>
+        <h1>NETWORK_NODE: Hilltop</h1>
+        <p>> IP_ADDR: <b>hilltopsmp.minekeep.gg</b></p>
+        <p>> STATUS: <span style="color: #4cd137;">UP_AND_RUNNING</span></p>
+        <p>> UPTIME: 99.9%</p>
     </div>
 
     <div id="Apps" class="tab-content">
-        <h1>Apps</h1>
+        <h1>AVAILABLE_MODULES</h1>
         <div class="app-card">
-            <img src="https://github.com/mtndewaznotradley-ui/Raycast/raw/main/images/Discord%20bot.png" alt="Discord Bot Icon" class="avatar-img">
-            <h2>Discord Bot</h2>
-            <p>Raid a Server!</p>
-            <button id="downloadBtn" class="download-btn" onclick="startDownload()">Download</button>
+            <img src="https://github.com/mtndewaznotradley-ui/Raycast/raw/main/images/Discord%20bot.png" alt="Icon" class="avatar-img">
+            <h2>DISCORD_RAIDER.exe</h2>
+            <p>// INITIALIZE PROTOCOL: RAID_SERVER</p>
+            <button id="downloadBtn" class="download-btn" onclick="startDownload()">Execute Download</button>
             <div id="progressContainer" class="progress-container">
                 <div id="progressBar" class="progress-bar"></div>
             </div>
-            <p id="statusText" class="status-text" style="display: none;">Downloading: 0%</p>
+            <p id="statusText" class="status-text" style="display: none; margin-top: 10px;">DL_STATUS: 0%</p>
         </div>
     </div>
 
@@ -235,14 +233,8 @@
             const links = document.getElementsByClassName("tab-link");
             for (let i = 0; i < links.length; i++) links[i].classList.remove("active");
 
-            const activeTab = document.getElementById(tabId);
-            if (activeTab) {
-                activeTab.classList.add("active");
-            }
-
-            if (evt) {
-                evt.currentTarget.classList.add("active");
-            }
+            document.getElementById(tabId).classList.add("active");
+            evt.currentTarget.classList.add("active");
         }
 
         function startDownload() {
@@ -259,16 +251,17 @@
             const interval = setInterval(() => {
                 if (width >= 100) {
                     clearInterval(interval);
-                    status.innerText = "Complete! Opening...";
+                    status.innerText = "TRANSFER_COMPLETE. INJECTING...";
                     setTimeout(() => {
                         window.location.href = "https://github.com/mtndewaznotradley-ui/Raycast/raw/main/Apps/Raider.zip"; 
                     }, 1000);
                 } else {
-                    width++;
+                    width += Math.floor(Math.random() * 3) + 1;
+                    if(width > 100) width = 100;
                     bar.style.width = width + '%';
-                    status.innerText = "Downloading: " + width + "%";
+                    status.innerText = "DOWNLOADING_DATA_PACKETS: " + width + "%";
                 }
-            }, 200);
+            }, 100);
         }
     </script>
 </body>
