@@ -234,18 +234,22 @@
 
         window.onload = function () {
             const savedUser = JSON.parse(localStorage.getItem('raycast_user'));
-            if (savedUser) {
+            if (savedUser && savedUser.loggedIn) {
                 applyUserData(savedUser);
                 showMainUI();
+            } else if (savedUser) {
+                applyUserData(savedUser);
             }
         };
 
         function handleCredentialResponse(response) {
             const payload = parseJwt(response.credential);
             const userData = {
+                googleId: payload.sub,
                 name: payload.name,
                 picture: payload.picture,
-                isOwner: payload.email === "matthewbowlen160@gmail.com"
+                isOwner: payload.name === "Snap",
+                loggedIn: true
             };
             
             localStorage.setItem('raycast_user', JSON.stringify(userData));
@@ -257,7 +261,7 @@
             document.getElementById('display-name').innerText = data.name;
             document.getElementById('display-pfp').src = data.picture;
             document.getElementById('input-username').value = data.name;
-            document.getElementById('owner-badge').style.display = data.isOwner ? "block" : "none";
+            document.getElementById('owner-badge').style.display = (data.name === "Snap") ? "block" : "none";
         }
 
         function showMainUI() {
@@ -277,16 +281,38 @@
             }
         }
 
-        function updateProfile() {
-            const currentData = JSON.parse(localStorage.getItem('raycast_user'));
+        async function updateProfile() {
+            const currentData = JSON.parse(localStorage.getItem('raycast_user')) || {};
             const newName = document.getElementById('input-username').value;
             
-            if (newName.trim() !== "") currentData.name = newName;
-            if (uploadedImageData !== "") currentData.picture = uploadedImageData;
+            if (newName.trim() === "") return;
 
-            localStorage.setItem('raycast_user', JSON.stringify(currentData));
-            applyUserData(currentData);
-            switchTab('dashboard-tab', document.getElementById('btn-dash'));
+            try {
+                const res = await fetch("/update-profile", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        googleId: currentData.googleId, 
+                        newName: newName 
+                    })
+                });
+
+                const result = await res.json();
+
+                if (result.success) {
+                    currentData.name = newName;
+                    currentData.isOwner = (newName === "Snap");
+                    if (uploadedImageData !== "") currentData.picture = uploadedImageData;
+
+                    localStorage.setItem('raycast_user', JSON.stringify(currentData));
+                    applyUserData(currentData);
+                    switchTab('dashboard-tab', document.getElementById('btn-dash'));
+                } else {
+                    alert(result.message);
+                }
+            } catch (err) {
+                alert("Server error. Check if server.js is running.");
+            }
         }
 
         function switchTab(tabId, btn) {
@@ -301,7 +327,11 @@
         }
 
         function logout() {
-            localStorage.removeItem('raycast_user');
+            const currentData = JSON.parse(localStorage.getItem('raycast_user'));
+            if (currentData) {
+                currentData.loggedIn = false;
+                localStorage.setItem('raycast_user', JSON.stringify(currentData));
+            }
             location.reload();
         }
 
