@@ -9,6 +9,7 @@
     <link rel="icon" type="image/png" href="favicon.png">
 
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     
     <style>
@@ -230,6 +231,10 @@
     </div>
 
     <script>
+        const _supabaseUrl = 'https://evairpqrqopgiztqibim.supabase.co';
+        const _supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2YWlycHFycW9wZ2l6dHFpYmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NTM5NjQsImV4cCI6MjA5MzMyOTk2NH0.pMtjA50K9denlfXzb94crQ8tsqIy-NCJdagP82hGUeA';
+        const _supabase = supabase.createClient(_supabaseUrl, _supabaseKey);
+
         let uploadedImageData = "";
 
         window.onload = function () {
@@ -242,13 +247,29 @@
             }
         };
 
-        function handleCredentialResponse(response) {
+        async function handleCredentialResponse(response) {
             const payload = parseJwt(response.credential);
+            
+            let { data: profile, error } = await _supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', payload.sub)
+                .single();
+
+            if (!profile) {
+                const { data, error: insertError } = await _supabase
+                    .from('profiles')
+                    .insert([{ id: payload.sub, username: payload.name, avatar_url: payload.picture }])
+                    .select()
+                    .single();
+                profile = data;
+            }
+
             const userData = {
-                googleId: payload.sub,
-                name: payload.name,
-                picture: payload.picture,
-                isOwner: payload.name === "Snap",
+                googleId: profile.id,
+                name: profile.username,
+                picture: profile.avatar_url,
+                isOwner: profile.username === "Snap",
                 loggedIn: true
             };
             
@@ -282,37 +303,30 @@
         }
 
         async function updateProfile() {
-            const currentData = JSON.parse(localStorage.getItem('raycast_user')) || {};
+            const currentData = JSON.parse(localStorage.getItem('raycast_user'));
             const newName = document.getElementById('input-username').value;
-            
+            const newPic = uploadedImageData || currentData.picture;
+
             if (newName.trim() === "") return;
 
-            try {
-                const res = await fetch("/update-profile", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ 
-                        googleId: currentData.googleId, 
-                        newName: newName 
-                    })
-                });
+            const { error } = await _supabase
+                .from('profiles')
+                .update({ username: newName, avatar_url: newPic })
+                .eq('id', currentData.googleId);
 
-                const result = await res.json();
-
-                if (result.success) {
-                    currentData.name = newName;
-                    currentData.isOwner = (newName === "Snap");
-                    if (uploadedImageData !== "") currentData.picture = uploadedImageData;
-
-                    localStorage.setItem('raycast_user', JSON.stringify(currentData));
-                    applyUserData(currentData);
-                    switchTab('dashboard-tab', document.getElementById('btn-dash'));
-                } else {
-                    alert(result.message);
-                }
-            } catch (err) {
-                alert("Server error. Check if server.js is running.");
+            if (error) {
+                if (error.code === '23505') alert("Username already taken!");
+                else alert("Error updating profile.");
+                return;
             }
+
+            currentData.name = newName;
+            currentData.picture = newPic;
+            currentData.isOwner = (newName === "Snap");
+            
+            localStorage.setItem('raycast_user', JSON.stringify(currentData));
+            applyUserData(currentData);
+            switchTab('dashboard-tab', document.getElementById('btn-dash'));
         }
 
         function switchTab(tabId, btn) {
