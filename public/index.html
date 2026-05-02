@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raycast Dashboard</title>
+    <title>Raycast</title>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     
@@ -159,6 +159,13 @@
             margin-top: 20px;
         }
 
+        .btn-logout {
+            background: transparent;
+            color: var(--owner-color);
+            border: 1px solid var(--owner-color);
+            margin-top: 10px;
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -179,8 +186,8 @@
     </header>
 
     <nav id="navbar">
-        <button class="nav-btn active" onclick="switchTab('dashboard-tab')">Dashboard</button>
-        <button class="nav-btn" onclick="switchTab('settings-tab')">Settings</button>
+        <button class="nav-btn active" id="btn-dash" onclick="switchTab('dashboard-tab', this)">Dashboard</button>
+        <button class="nav-btn" onclick="switchTab('settings-tab', this)">Settings</button>
     </nav>
 
     <div class="container">
@@ -213,6 +220,7 @@
                     <input type="file" id="input-file" accept="image/*" onchange="previewFile()">
                     
                     <button class="btn-update" onclick="updateProfile()">Save Changes</button>
+                    <button class="btn-update btn-logout" onclick="logout()">Logout Session</button>
                 </div>
             </div>
         </div>
@@ -221,17 +229,35 @@
     <script>
         let uploadedImageData = "";
 
+        window.onload = function () {
+            const savedUser = JSON.parse(localStorage.getItem('raycast_user'));
+            if (savedUser) {
+                applyUserData(savedUser);
+                showMainUI();
+            }
+        };
+
         function handleCredentialResponse(response) {
             const payload = parseJwt(response.credential);
+            const userData = {
+                name: payload.name,
+                picture: payload.picture,
+                isOwner: payload.email === "matthewbowlen160@gmail.com"
+            };
             
-            document.getElementById('display-name').innerText = payload.name;
-            document.getElementById('display-pfp').src = payload.picture;
-            document.getElementById('input-username').value = payload.name;
+            localStorage.setItem('raycast_user', JSON.stringify(userData));
+            applyUserData(userData);
+            showMainUI();
+        }
 
-            if (payload.email === "matthewbowlen160@gmail.com") {
-                document.getElementById('owner-badge').style.display = "block";
-            }
+        function applyUserData(data) {
+            document.getElementById('display-name').innerText = data.name;
+            document.getElementById('display-pfp').src = data.picture;
+            document.getElementById('input-username').value = data.name;
+            document.getElementById('owner-badge').style.display = data.isOwner ? "block" : "none";
+        }
 
+        function showMainUI() {
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('navbar').style.display = 'flex';
             document.getElementById('main-content').style.display = 'block';
@@ -249,25 +275,31 @@
         }
 
         function updateProfile() {
+            const currentData = JSON.parse(localStorage.getItem('raycast_user'));
             const newName = document.getElementById('input-username').value;
-            if (newName.trim() !== "") {
-                document.getElementById('display-name').innerText = newName;
-            }
-            if (uploadedImageData !== "") {
-                document.getElementById('display-pfp').src = uploadedImageData;
-            }
-            switchTab('dashboard-tab');
+            
+            if (newName.trim() !== "") currentData.name = newName;
+            if (uploadedImageData !== "") currentData.picture = uploadedImageData;
+
+            localStorage.setItem('raycast_user', JSON.stringify(currentData));
+            applyUserData(currentData);
+            switchTab('dashboard-tab', document.getElementById('btn-dash'));
         }
 
-        function switchTab(tabId) {
+        function switchTab(tabId, btn) {
             const contents = document.getElementsByClassName('tab-content');
             for (let content of contents) content.classList.remove('active');
             
             const btns = document.getElementsByClassName('nav-btn');
-            for (let btn of btns) btn.classList.remove('active');
+            for (let b of btns) b.classList.remove('active');
 
             document.getElementById(tabId).classList.add('active');
-            event.currentTarget.classList.add('active');
+            btn.classList.add('active');
+        }
+
+        function logout() {
+            localStorage.removeItem('raycast_user');
+            location.reload();
         }
 
         function parseJwt(token) {
