@@ -14,6 +14,7 @@
             --text: #1a1a1a;
             --accent: #555555;
             --border: #eeeeee;
+            --owner-color: #ff4757;
         }
 
         * {
@@ -46,10 +47,33 @@
             margin: 0;
         }
 
+        nav {
+            display: none;
+            width: 100%;
+            justify-content: center;
+            border-bottom: 1px solid var(--border);
+            background: #fafafa;
+        }
+
+        .nav-btn {
+            padding: 15px 25px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--accent);
+            border-bottom: 2px solid transparent;
+        }
+
+        .nav-btn.active {
+            color: #000;
+            border-bottom: 2px solid #000;
+        }
+
         .container {
             max-width: 500px;
             width: 90%;
-            margin-top: 60px;
+            margin-top: 40px;
             text-align: center;
         }
 
@@ -57,15 +81,17 @@
             padding: 40px;
         }
 
-        h2 {
-            font-weight: 300;
-            letter-spacing: -0.5px;
-            margin-bottom: 30px;
+        #main-content {
+            display: none;
         }
 
-        #dashboard {
+        .tab-content {
             display: none;
-            animation: fadeIn 0.5s ease;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
         }
 
         .profile-card {
@@ -89,12 +115,19 @@
             font-size: 1.5rem;
             font-weight: 600;
             display: block;
-            margin-bottom: 5px;
+        }
+
+        .owner-badge {
+            display: none;
+            color: var(--owner-color);
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-top: 5px;
         }
 
         .edit-panel {
             text-align: left;
-            margin-top: 40px;
         }
 
         label {
@@ -103,22 +136,15 @@
             font-weight: 600;
             color: var(--accent);
             display: block;
-            margin-bottom: 8px;
+            margin: 15px 0 8px 0;
         }
 
         input {
             width: 100%;
             padding: 12px;
-            margin-bottom: 20px;
             border: 1px solid var(--border);
             border-radius: 6px;
-            font-size: 1rem;
             outline: none;
-            transition: border 0.2s;
-        }
-
-        input:focus {
-            border-color: #000;
         }
 
         .btn-update {
@@ -130,16 +156,12 @@
             border-radius: 6px;
             font-weight: 600;
             cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        .btn-update:hover {
-            opacity: 0.8;
+            margin-top: 20px;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .g-center {
@@ -156,62 +178,96 @@
         <h1 class="logo">Raycast</h1>
     </header>
 
+    <nav id="navbar">
+        <button class="nav-btn active" onclick="switchTab('dashboard-tab')">Dashboard</button>
+        <button class="nav-btn" onclick="switchTab('settings-tab')">Settings</button>
+    </nav>
+
     <div class="container">
         <div id="login-screen">
             <h2>Please Log In</h2>
-            
             <div id="g_id_onload"
                  data-client_id="609524851944-vpok2chtgp9v08nnr67qcqgfjk431tkv.apps.googleusercontent.com"
-                 data-context="signin"
-                 data-ux_mode="popup"
-                 data-callback="handleCredentialResponse"
-                 data-auto_prompt="false">
+                 data-callback="handleCredentialResponse">
             </div>
-
             <div class="g-center">
-                <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-text="signin_with" data-size="large" data-logo_alignment="left"></div>
+                <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-size="large"></div>
             </div>
         </div>
 
-        <div id="dashboard">
-            <div class="profile-card">
-                <img id="display-pfp" src="" alt="Profile">
-                <span id="display-name">User</span>
-                <p style="color: var(--accent); font-size: 0.9rem;">Welcome back to your dashboard.</p>
+        <div id="main-content">
+            <div id="dashboard-tab" class="tab-content active">
+                <div class="profile-card">
+                    <img id="display-pfp" src="" alt="Profile">
+                    <span id="display-name">User</span>
+                    <div id="owner-badge" class="owner-badge">[OWNER]</div>
+                </div>
             </div>
 
-            <div class="edit-panel">
-                <label>Change Username</label>
-                <input type="text" id="input-username" placeholder="New name...">
-                
-                <label>Change Profile Picture (URL)</label>
-                <input type="text" id="input-pfp" placeholder="Image URL...">
-                
-                <button class="btn-update" onclick="updateProfile()">Update Profile</button>
+            <div id="settings-tab" class="tab-content">
+                <div class="edit-panel">
+                    <label>Username</label>
+                    <input type="text" id="input-username">
+                    
+                    <label>Upload Profile Picture</label>
+                    <input type="file" id="input-file" accept="image/*" onchange="previewFile()">
+                    
+                    <button class="btn-update" onclick="updateProfile()">Save Changes</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
+        let uploadedImageData = "";
+
         function handleCredentialResponse(response) {
             const payload = parseJwt(response.credential);
+            
             document.getElementById('display-name').innerText = payload.name;
             document.getElementById('display-pfp').src = payload.picture;
             document.getElementById('input-username').value = payload.name;
+
+            if (payload.email === "matthewbowlen160@gmail.com") {
+                document.getElementById('owner-badge').style.display = "block";
+            }
+
             document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('navbar').style.display = 'flex';
+            document.getElementById('main-content').style.display = 'block';
+        }
+
+        function previewFile() {
+            const file = document.getElementById('input-file').files[0];
+            const reader = new FileReader();
+            reader.onloadend = function() {
+                uploadedImageData = reader.result;
+            }
+            if (file) {
+                reader.readAsDataURL(file);
+            }
         }
 
         function updateProfile() {
             const newName = document.getElementById('input-username').value;
-            const newPfp = document.getElementById('input-pfp').value;
-
             if (newName.trim() !== "") {
                 document.getElementById('display-name').innerText = newName;
             }
-            if (newPfp.trim() !== "") {
-                document.getElementById('display-pfp').src = newPfp;
+            if (uploadedImageData !== "") {
+                document.getElementById('display-pfp').src = uploadedImageData;
             }
+            switchTab('dashboard-tab');
+        }
+
+        function switchTab(tabId) {
+            const contents = document.getElementsByClassName('tab-content');
+            for (let content of contents) content.classList.remove('active');
+            
+            const btns = document.getElementsByClassName('nav-btn');
+            for (let btn of btns) btn.classList.remove('active');
+
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
         }
 
         function parseJwt(token) {
@@ -224,5 +280,4 @@
         }
     </script>
 </body>
-
 </html>
