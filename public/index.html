@@ -254,15 +254,25 @@
                 .from('profiles')
                 .select('*')
                 .eq('id', payload.sub)
-                .single();
+                .maybeSingle();
 
             if (!profile) {
-                const { data, error: insertError } = await _supabase
+                const { data: newProfile, error: insertError } = await _supabase
                     .from('profiles')
-                    .insert([{ id: payload.sub, username: payload.name, avatar_url: payload.picture }])
+                    .insert([{ 
+                        id: payload.sub, 
+                        username: payload.name, 
+                        avatar_url: payload.picture 
+                    }])
                     .select()
                     .single();
-                profile = data;
+                
+                if (insertError) {
+                    console.error("Insert Error:", insertError);
+                    alert("Database Error: Check your RLS Policies!");
+                    return;
+                }
+                profile = newProfile;
             }
 
             const userData = {
@@ -316,7 +326,7 @@
 
             if (error) {
                 if (error.code === '23505') alert("Username already taken!");
-                else alert("Error updating profile.");
+                else alert("Error updating profile: " + error.message);
                 return;
             }
 
