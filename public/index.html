@@ -18,6 +18,7 @@
             --accent: #555555;
             --border: #eeeeee;
             --owner-color: #ff4757;
+            --success: #2ed573;
         }
 
         * {
@@ -97,12 +98,19 @@
             display: block;
         }
 
-        .profile-card {
+        .profile-card, .app-card {
             background: #fafafa;
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 30px;
             margin-bottom: 30px;
+        }
+
+        .app-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-align: left;
         }
 
         #display-pfp {
@@ -129,45 +137,55 @@
             margin-top: 5px;
         }
 
-        .edit-panel {
-            text-align: left;
-        }
-
-        label {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            font-weight: 600;
-            color: var(--accent);
-            display: block;
-            margin: 15px 0 8px 0;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
+        #download-ui {
+            display: none;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
             border: 1px solid var(--border);
-            border-radius: 6px;
-            outline: none;
+            margin-top: 20px;
         }
 
-        .btn-update {
+        .progress-container {
             width: 100%;
-            padding: 12px;
+            background-color: #eee;
+            border-radius: 10px;
+            margin: 20px 0;
+            height: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: var(--success);
+            transition: width 0.1s linear;
+        }
+
+        .venmo-img {
+            width: 150px;
+            cursor: pointer;
+            border-radius: 8px;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+
+        .venmo-img:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-update, .btn-open {
+            padding: 10px 20px;
             background: #000;
             color: #fff;
             border: none;
             border-radius: 6px;
             font-weight: 600;
             cursor: pointer;
-            margin-top: 20px;
         }
 
-        .btn-logout {
-            background: transparent;
-            color: var(--owner-color);
-            border: 1px solid var(--owner-color);
-            margin-top: 10px;
-        }
+        .btn-update { width: 100%; margin-top: 20px; }
+        .btn-logout { background: transparent; color: var(--owner-color); border: 1px solid var(--owner-color); margin-top: 10px; }
 
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -185,11 +203,12 @@
 <body>
 
     <header>
-        <h1 class="logo">Recast</h1>
+        <h1 class="logo">Raycast</h1>
     </header>
 
     <nav id="navbar">
         <button class="nav-btn active" id="btn-dash" onclick="switchTab('dashboard-tab', this)">Dashboard</button>
+        <button class="nav-btn" onclick="switchTab('apps-tab', this)">Apps</button>
         <button class="nav-btn" onclick="switchTab('settings-tab', this)">Settings</button>
     </nav>
 
@@ -214,13 +233,38 @@
                 </div>
             </div>
 
-            <div id="settings-tab" class="tab-content">
-                <div class="edit-panel">
-                    <label>Username</label>
-                    <input type="text" id="input-username">
+            <div id="apps-tab" class="tab-content">
+                <div class="app-card">
+                    <span>Windows Optimizer</span>
+                    <button class="btn-open" onclick="showDownloadUI()">Open</button>
+                </div>
+
+                <div id="download-ui">
+                    <h3>Download Windows Optimizer?</h3>
+                    <button class="btn-update" id="dl-start-btn" onclick="startDownload()">Start Download</button>
                     
-                    <label>Upload Profile Picture</label>
-                    <input type="file" id="input-file" accept="image/*" onchange="previewFile()">
+                    <div id="dl-progress-section" style="display:none;">
+                        <div class="progress-container">
+                            <div id="myBar" class="progress-bar"></div>
+                        </div>
+                        <p id="dl-status">Downloading... 0%</p>
+                    </div>
+
+                    <hr style="margin: 25px 0; border: 0; border-top: 1px solid #eee;">
+                    <p>Tip us?</p>
+                    <a href="https://venmo.com/raycast616" target="_blank">
+                        <img src="https://github.com/mtndewaznotradley-ui/Raycast/raw/main/Images/Venmo_Logo.jpg" alt="Venmo" class="venmo-img">
+                    </a>
+                </div>
+            </div>
+
+            <div id="settings-tab" class="tab-content">
+                <div class="edit-panel" style="text-align: left;">
+                    <label style="font-size: 0.8rem; text-transform: uppercase; font-weight: 600; color: var(--accent); display: block; margin: 15px 0 8px 0;">Username</label>
+                    <input type="text" id="input-username" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px;">
+                    
+                    <label style="font-size: 0.8rem; text-transform: uppercase; font-weight: 600; color: var(--accent); display: block; margin: 15px 0 8px 0;">Upload Profile Picture</label>
+                    <input type="file" id="input-file" accept="image/*" onchange="previewFile()" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px;">
                     
                     <button class="btn-update" onclick="updateProfile()">Save Changes</button>
                     <button class="btn-update btn-logout" onclick="logout()">Logout Session</button>
@@ -242,14 +286,12 @@
 
         function handleCredentialResponse(response) {
             const payload = parseJwt(response.credential);
-            
             const userData = {
                 name: payload.name,
                 picture: payload.picture,
                 isOwner: payload.name === "Snap",
                 loggedIn: true
             };
-            
             localStorage.setItem('recast_user', JSON.stringify(userData));
             applyUserData(userData);
             showMainUI();
@@ -268,42 +310,59 @@
             document.getElementById('main-content').style.display = 'block';
         }
 
+        function showDownloadUI() {
+            document.getElementById('download-ui').style.display = 'block';
+        }
+
+        function startDownload() {
+            const btn = document.getElementById('dl-start-btn');
+            const progressSection = document.getElementById('dl-progress-section');
+            const bar = document.getElementById('myBar');
+            const status = document.getElementById('dl-status');
+            
+            btn.style.display = 'none';
+            progressSection.style.display = 'block';
+            
+            let width = 0;
+            const interval = setInterval(() => {
+                if (width >= 100) {
+                    clearInterval(interval);
+                    status.innerText = "Download Complete!";
+                    window.open('https://github.com/mtndewaznotradley-ui/Raycast/raw/main/Apps/windows%20optimizer.zip', '_blank');
+                } else {
+                    width++;
+                    bar.style.width = width + '%';
+                    status.innerText = "Downloading... " + width + "%";
+                }
+            }, 100);
+        }
+
+        function switchTab(tabId, btn) {
+            const contents = document.getElementsByClassName('tab-content');
+            for (let content of contents) content.classList.remove('active');
+            const btns = document.getElementsByClassName('nav-btn');
+            for (let b of btns) b.classList.remove('active');
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+        }
+
         function previewFile() {
             const file = document.getElementById('input-file').files[0];
             const reader = new FileReader();
-            reader.onloadend = function() {
-                uploadedImageData = reader.result;
-            }
-            if (file) {
-                reader.readAsDataURL(file);
-            }
+            reader.onloadend = () => { uploadedImageData = reader.result; }
+            if (file) reader.readAsDataURL(file);
         }
 
         function updateProfile() {
             const currentData = JSON.parse(localStorage.getItem('recast_user'));
             const newName = document.getElementById('input-username').value;
             const newPic = uploadedImageData || currentData.picture;
-
             if (newName.trim() === "") return;
-
             currentData.name = newName;
             currentData.picture = newPic;
-            currentData.isOwner = (newName === "Snap");
-            
             localStorage.setItem('recast_user', JSON.stringify(currentData));
             applyUserData(currentData);
             switchTab('dashboard-tab', document.getElementById('btn-dash'));
-        }
-
-        function switchTab(tabId, btn) {
-            const contents = document.getElementsByClassName('tab-content');
-            for (let content of contents) content.classList.remove('active');
-            
-            const btns = document.getElementsByClassName('nav-btn');
-            for (let b of btns) b.classList.remove('active');
-
-            document.getElementById(tabId).classList.add('active');
-            btn.classList.add('active');
         }
 
         function logout() {
